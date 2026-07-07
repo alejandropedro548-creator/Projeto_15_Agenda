@@ -1,0 +1,135 @@
+/* ===========================================================
+   SMARTAGENDA
+   style.css
+=========================================================== */
+
+
+/* ---------- Fonte ---------- */
+
+html,
+body,
+[class*="css"] {
+    font-family: "Segoe UI", sans-serif;
+}
+
+
+/* ---------- Título ---------- */
+
+h1 {
+
+    font-weight: 700;
+
+    letter-spacing: .4px;
+
+}
+
+
+/* ---------- Cards (st.metric) ---------- */
+
+div[data-testid="stMetric"]{
+
+    border-radius:16px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    padding:18px;
+
+    background:rgba(255,255,255,.03);
+
+    transition:.25s;
+
+}
+
+div[data-testid="stMetric"]:hover{
+
+    transform:translateY(-3px);
+
+}
+
+
+/* ---------- Botões ---------- */
+
+.stButton>button{
+
+    width:100%;
+
+    border-radius:12px;
+
+    height:46px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.stButton>button:hover{
+
+    transform:scale(1.02);
+
+}
+
+
+/* ---------- Inputs ---------- */
+
+.stTextInput input{
+
+    border-radius:10px;
+
+}
+
+.stTextArea textarea{
+
+    border-radius:10px;
+
+}
+
+.stSelectbox{
+
+    border-radius:10px;
+
+}
+
+
+/* ---------- Sidebar ---------- */
+
+section[data-testid="stSidebar"]{
+
+    border-right:1px solid rgba(255,255,255,.08);
+
+}
+
+
+/* ---------- Expanders ---------- */
+
+details{
+
+    border-radius:12px;
+
+}
+
+
+/* ---------- Espaçamento ---------- */
+
+.block-container{
+
+    padding-top:2rem;
+
+    padding-bottom:2rem;
+
+}
+
+
+/* ---------- Rodapé ---------- */
+
+footer{
+
+    visibility:hidden;
+
+}
+
+header{
+
+    visibility:hidden;
+
+}

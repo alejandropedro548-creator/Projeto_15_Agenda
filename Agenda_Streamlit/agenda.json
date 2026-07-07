@@ -1,0 +1,13 @@
+[
+    {
+        "id": "0a66ede6-8730-4a6b-b165-97a09f57178d",
+        "titulo": "Aniversário Alejandro",
+        "descricao": "",
+        "categoria": "Família",
+        "prioridade": "Média",
+        "data": "18/08/2026",
+        "hora": "15:00",
+        "recorrencia": "Anual",
+        "concluido": false
+    }
+]
