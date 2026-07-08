@@ -1,18 +1,11 @@
 
 from future import annotations
-
 import json
-
 import uuid
-
 from dataclasses import dataclass, asdict
-
 from datetime import datetime
-
 from pathlib import Path
-
 import streamlit as st
-
 =====================================================
 
 CONFIGURAÇÃO
