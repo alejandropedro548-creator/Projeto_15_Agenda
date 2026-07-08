@@ -1,135 +1,266 @@
-/* ===========================================================
-   SMARTAGENDA
-   style.css
-=========================================================== */
+/* ============================================
+   SMARTAGENDA - MODERN UI
+============================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* ---------- Fonte ---------- */
-
-html,
-body,
-[class*="css"] {
-    font-family: "Segoe UI", sans-serif;
+*{
+    font-family:'Inter',sans-serif;
 }
 
+/* Fundo */
 
-/* ---------- Título ---------- */
-
-h1 {
-
-    font-weight: 700;
-
-    letter-spacing: .4px;
-
+.stApp{
+    background:
+        radial-gradient(circle at top right,#2d46ff33 0%,transparent 35%),
+        radial-gradient(circle at bottom left,#00d4ff22 0%,transparent 40%),
+        linear-gradient(135deg,#070b14,#0d111c,#111827);
 }
 
+/* Remove Streamlit */
 
-/* ---------- Cards (st.metric) ---------- */
+header{
+    visibility:hidden;
+}
 
-div[data-testid="stMetric"]{
+footer{
+    visibility:hidden;
+}
 
-    border-radius:16px;
+#MainMenu{
+    visibility:hidden;
+}
 
+/* Conteúdo */
+
+.main .block-container{
+    max-width:1350px;
+    padding-top:2rem;
+    padding-bottom:2rem;
+}
+
+/* Sidebar */
+
+section[data-testid="stSidebar"]{
+    background:rgba(15,23,42,.88);
+    backdrop-filter:blur(18px);
+    border-right:1px solid rgba(255,255,255,.08);
+}
+
+/* Títulos */
+
+h1{
+    color:white;
+    font-size:2.6rem;
+    font-weight:800;
+    letter-spacing:-1px;
+}
+
+h2,h3{
+    color:white;
+}
+
+/* Cards */
+
+div[data-testid="metric-container"]{
+    background:rgba(255,255,255,.05);
     border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    padding:25px;
+    backdrop-filter:blur(20px);
 
-    padding:18px;
+    transition:.35s;
+}
 
-    background:rgba(255,255,255,.03);
+div[data-testid="metric-container"]:hover{
 
-    transition:.25s;
+    transform:translateY(-5px);
+
+    border:1px solid #3b82f6;
+
+    box-shadow:
+
+    0 15px 40px rgba(59,130,246,.25);
 
 }
 
-div[data-testid="stMetric"]:hover{
+div[data-testid="metric-container"] label{
 
-    transform:translateY(-3px);
+    color:#9ca3af;
+
+    font-size:14px;
 
 }
 
+div[data-testid="metric-container"] div{
 
-/* ---------- Botões ---------- */
+    color:white;
 
-.stButton>button{
+}
+
+/* Inputs */
+
+.stTextInput input,
+.stTextArea textarea,
+.stSelectbox div[data-baseweb="select"],
+.stDateInput input,
+.stTimeInput input{
+
+    background:#151c2e !important;
+
+    color:white !important;
+
+    border-radius:14px !important;
+
+    border:1px solid #263247 !important;
+
+    transition:.3s;
+
+}
+
+.stTextInput input:focus,
+.stTextArea textarea:focus{
+
+    border:1px solid #3b82f6 !important;
+
+    box-shadow:0 0 20px rgba(59,130,246,.3);
+
+}
+
+/* Botões */
+
+.stButton button,
+.stFormSubmitButton button{
 
     width:100%;
 
-    border-radius:12px;
+    border:none;
 
-    height:46px;
+    border-radius:14px;
 
-    font-weight:600;
+    padding:.7rem;
 
-    transition:.25s;
+    color:white;
 
-}
+    font-weight:700;
 
-.stButton>button:hover{
+    background:linear-gradient(90deg,#2563eb,#06b6d4);
 
-    transform:scale(1.02);
-
-}
-
-
-/* ---------- Inputs ---------- */
-
-.stTextInput input{
-
-    border-radius:10px;
+    transition:.35s;
 
 }
 
-.stTextArea textarea{
+.stButton button:hover,
+.stFormSubmitButton button:hover{
 
-    border-radius:10px;
+    transform:translateY(-3px);
 
-}
+    box-shadow:
 
-.stSelectbox{
-
-    border-radius:10px;
-
-}
-
-
-/* ---------- Sidebar ---------- */
-
-section[data-testid="stSidebar"]{
-
-    border-right:1px solid rgba(255,255,255,.08);
+    0 10px 25px rgba(37,99,235,.45);
 
 }
 
+/* Expander */
 
-/* ---------- Expanders ---------- */
+.streamlit-expanderHeader{
 
-details{
+    font-size:17px;
 
-    border-radius:12px;
+    font-weight:700;
 
-}
-
-
-/* ---------- Espaçamento ---------- */
-
-.block-container{
-
-    padding-top:2rem;
-
-    padding-bottom:2rem;
+    color:white;
 
 }
 
+div[data-testid="stExpander"]{
 
-/* ---------- Rodapé ---------- */
+    background:rgba(255,255,255,.05);
 
-footer{
+    border-radius:18px;
 
-    visibility:hidden;
+    border:1px solid rgba(255,255,255,.08);
+
+    overflow:hidden;
 
 }
 
-header{
+/* Alertas */
 
-    visibility:hidden;
+.stSuccess{
+
+    border-radius:14px;
+
+}
+
+.stWarning{
+
+    border-radius:14px;
+
+}
+
+.stError{
+
+    border-radius:14px;
+
+}
+
+.stInfo{
+
+    border-radius:14px;
+
+}
+
+/* Radio */
+
+.stRadio{
+
+    color:white;
+
+}
+
+/* Divider */
+
+hr{
+
+    border:1px solid rgba(255,255,255,.08);
+
+}
+
+/* Footer */
+
+.stCaption{
+
+    text-align:center;
+
+    color:#94a3b8;
+
+}
+
+/* Scroll */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#0b1120;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#2563eb;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#3b82f6;
 
 }
