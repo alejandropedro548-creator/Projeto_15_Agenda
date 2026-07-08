@@ -187,7 +187,42 @@ def dias_restantes(
 
 def dashboard():
 
-    st.title("📅 SmartAgenda")
+    st.markdown("""
+<div class="hero">
+
+<div class="hero-top">
+
+<div>
+
+<div class="hero-badge">
+SMARTAGENDA • IA
+</div>
+
+<h1>
+Sua rotina organizada
+de forma inteligente.
+</h1>
+
+<p>
+
+Gerencie estudos, trabalho, compromissos e objetivos
+em uma interface moderna inspirada nos melhores
+softwares do mercado.
+
+</p>
+
+</div>
+
+<div class="hero-icon">
+
+📅
+
+</div>
+
+</div>
+
+</div>
+""", unsafe_allow_html=True)
 
     total = len(
         st.session_state.eventos
@@ -204,20 +239,65 @@ def dashboard():
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric(
-        "Eventos",
-        total
-    )
+  col1, col2, col3 = st.columns(3)
 
-    col2.metric(
-        "Pendentes",
-        pendentes
-    )
+with col1:
 
-    col3.metric(
-        "Concluídos",
-        concluidos
-    )
+    st.markdown(f"""
+<div class="stat-card">
+
+<div class="emoji">📅</div>
+
+<div class="title">
+Eventos
+</div>
+
+<div class="number">
+{total}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+with col2:
+
+    st.markdown(f"""
+<div class="stat-card">
+
+<div class="emoji">
+⌛
+</div>
+
+<div class="title">
+Pendentes
+</div>
+
+<div class="number">
+{pendentes}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+with col3:
+
+    st.markdown(f"""
+<div class="stat-card">
+
+<div class="emoji">
+✅
+</div>
+
+<div class="title">
+Concluídos
+</div>
+
+<div class="number">
+{concluidos}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
 
     futuros = [
 
@@ -232,6 +312,7 @@ def dashboard():
     ]
 
     if futuros:
+        st.markdown("<br>", unsafe_allow_html=True)
 
         futuros.sort(
 
