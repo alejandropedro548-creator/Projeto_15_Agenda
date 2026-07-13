@@ -1,1209 +1,662 @@
+from __future__ import annotations
 
-from future import annotations
 import json
 import uuid
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
+
 import streamlit as st
-=====================================================
 
-CONFIGURAÇÃO
-
-=====================================================
+# =====================================================
+# CONFIGURAÇÃO
+# =====================================================
 
 st.set_page_config(
-
-page_title="SmartAgenda",
-
-page_icon="📅",
-
-layout="wide"
-
+    page_title="SmartAgenda",
+    page_icon="📅",
+    layout="wide"
 )
-
 def carregar_css():
 
-css = Path("styles/style.css")
+    css = Path("styles/style.css")
 
+    if css.exists():
 
+        st.markdown(
 
-if css.exists():
+            f"<style>{css.read_text(encoding='utf-8')}</style>",
 
+            unsafe_allow_html=True
 
+        )
 
-    st.markdown(
-
-
-
-        f"<style>{css.read_text(encoding='utf-8')}</style>",
-
-
-
-        unsafe_allow_html=True
-
-
-
-    )
 
 carregar_css()
 
 DATA_FILE = Path("agenda.json")
 
-=====================================================
 
-MODELO
-
-=====================================================
+# =====================================================
+# MODELO
+# =====================================================
 
 @dataclass
-
 class Evento:
+    id: str
+    titulo: str
+    descricao: str
+    categoria: str
+    prioridade: str
+    data: str
+    hora: str
+    recorrencia: str
+    concluido: bool = False
 
-id: str
 
-titulo: str
-
-descricao: str
-
-categoria: str
-
-prioridade: str
-
-data: str
-
-hora: str
-
-recorrencia: str
-
-concluido: bool = False
-
-=====================================================
-
-PERSISTÊNCIA
-
-=====================================================
+# =====================================================
+# PERSISTÊNCIA
+# =====================================================
 
 def carregar_eventos() -> list[Evento]:
 
-if not DATA_FILE.exists():
+    if not DATA_FILE.exists():
+        salvar_eventos([])
+        return []
 
-    salvar_eventos([])
+    try:
 
-    return []
+        with open(
+            DATA_FILE,
+            "r",
+            encoding="utf-8"
+        ) as arquivo:
 
+            dados = json.load(arquivo)
 
+        return [
+            Evento(**item)
+            for item in dados
+        ]
 
-try:
+    except Exception:
 
+        return []
 
-
-    with open(
-
-        DATA_FILE,
-
-        "r",
-
-        encoding="utf-8"
-
-    ) as arquivo:
-
-
-
-        dados = json.load(arquivo)
-
-
-
-    return [
-
-        Evento(**item)
-
-        for item in dados
-
-    ]
-
-
-
-except Exception:
-
-
-
-    return []
 
 def salvar_eventos(
-
-eventos: list[Evento]
-
+    eventos: list[Evento]
 ) -> None:
 
-with open(
+    with open(
+        DATA_FILE,
+        "w",
+        encoding="utf-8"
+    ) as arquivo:
 
-    DATA_FILE,
+        json.dump(
+            [
+                asdict(evento)
+                for evento in eventos
+            ],
+            arquivo,
+            indent=4,
+            ensure_ascii=False
+        )
 
-    "w",
 
-    encoding="utf-8"
-
-) as arquivo:
-
-
-
-    json.dump(
-
-        [
-
-            asdict(evento)
-
-            for evento in eventos
-
-        ],
-
-        arquivo,
-
-        indent=4,
-
-        ensure_ascii=False
-
-    )
-
-=====================================================
-
-ESTADO
-
-=====================================================
+# =====================================================
+# ESTADO
+# =====================================================
 
 if "eventos" not in st.session_state:
 
-st.session_state.eventos = (
+    st.session_state.eventos = (
+        carregar_eventos()
+    )
 
-    carregar_eventos()
 
-)
-
-=====================================================
-
-FUNÇÕES
-
-=====================================================
+# =====================================================
+# FUNÇÕES
+# =====================================================
 
 def adicionar_evento(
-
-titulo: str,
-
-descricao: str,
-
-categoria: str,
-
-prioridade: str,
-
-data,
-
-hora,
-
-recorrencia: str
-
+    titulo: str,
+    descricao: str,
+    categoria: str,
+    prioridade: str,
+    data,
+    hora,
+    recorrencia: str
 ):
 
-evento = Evento(
+    evento = Evento(
 
+        id=str(uuid.uuid4()),
 
+        titulo=titulo,
 
-    id=str(uuid.uuid4()),
+        descricao=descricao,
 
+        categoria=categoria,
 
+        prioridade=prioridade,
 
-    titulo=titulo,
+        data=data.strftime(
+            "%d/%m/%Y"
+        ),
 
+        hora=hora.strftime(
+            "%H:%M"
+        ),
 
+        recorrencia=recorrencia,
 
-    descricao=descricao,
+        concluido=False
 
+    )
 
+    st.session_state.eventos.append(
+        evento
+    )
 
-    categoria=categoria,
+    salvar_eventos(
+        st.session_state.eventos
+    )
 
-
-
-    prioridade=prioridade,
-
-
-
-    data=data.strftime(
-
-        "%d/%m/%Y"
-
-    ),
-
-
-
-    hora=hora.strftime(
-
-        "%H:%M"
-
-    ),
-
-
-
-    recorrencia=recorrencia,
-
-
-
-    concluido=False
-
-
-
-)
-
-
-
-st.session_state.eventos.append(
-
-    evento
-
-)
-
-
-
-salvar_eventos(
-
-    st.session_state.eventos
-
-)
 
 def dias_restantes(
-
-data_evento: str
-
+    data_evento: str
 ):
 
-hoje = datetime.now().date()
+    hoje = datetime.now().date()
+
+    evento = datetime.strptime(
+        data_evento,
+        "%d/%m/%Y"
+    ).date()
+
+    return (
+        evento - hoje
+    ).days
 
 
-
-evento = datetime.strptime(
-
-    data_evento,
-
-    "%d/%m/%Y"
-
-).date()
-
-
-
-return (
-
-    evento - hoje
-
-).days
-
-=====================================================
-
-DASHBOARD
-
-=====================================================
+# =====================================================
+# DASHBOARD
+# =====================================================
 
 def dashboard():
 
-st.title("📅 SmartAgenda")
+    st.title("📅 SmartAgenda")
 
+    total = len(
+        st.session_state.eventos
+    )
 
+    concluidos = sum(
+        e.concluido
+        for e in st.session_state.eventos
+    )
 
-total = len(
+    pendentes = (
+        total - concluidos
+    )
 
-    st.session_state.eventos
+    col1, col2, col3 = st.columns(3)
 
-)
+    col1.metric(
+        "Eventos",
+        total
+    )
 
+    col2.metric(
+        "Pendentes",
+        pendentes
+    )
 
+    col3.metric(
+        "Concluídos",
+        concluidos
+    )
 
-concluidos = sum(
+    futuros = [
 
-    e.concluido
+        evento
 
-    for e in st.session_state.eventos
+        for evento in st.session_state.eventos
 
-)
+        if dias_restantes(
+            evento.data
+        ) >= 0
 
+    ]
 
+    if futuros:
 
-pendentes = (
+        futuros.sort(
 
-    total - concluidos
+            key=lambda e:
 
-)
+            datetime.strptime(
 
+                e.data,
 
+                "%d/%m/%Y"
 
-col1, col2, col3 = st.columns(3)
+            )
 
+        )
 
+        proximo = futuros[0]
 
-col1.metric(
+        st.info(
 
-    "Eventos",
-
-    total
-
-)
-
-
-
-col2.metric(
-
-    "Pendentes",
-
-    pendentes
-
-)
-
-
-
-col3.metric(
-
-    "Concluídos",
-
-    concluidos
-
-)
-
-
-
-futuros = [
-
-
-
-    evento
-
-
-
-    for evento in st.session_state.eventos
-
-
-
-    if dias_restantes(
-
-        evento.data
-
-    ) >= 0
-
-
-
-]
-
-
-
-if futuros:
-
-
-
-    futuros.sort(
-
-
-
-        key=lambda e:
-
-
-
-        datetime.strptime(
-
-
-
-            e.data,
-
-
-
-            "%d/%m/%Y"
-
-
+            f"Próximo compromisso: "
+            f"{proximo.titulo} "
+            f"(faltam "
+            f"{dias_restantes(proximo.data)} dias)"
 
         )
 
 
-
-    )
-
-
-
-    proximo = futuros[0]
-
-
-
-    st.info(
-
-
-
-        f"Próximo compromisso: "
-
-        f"{proximo.titulo} "
-
-        f"(faltam "
-
-        f"{dias_restantes(proximo.data)} dias)"
-
-
-
-    )
-
-=====================================================
-
-SIDEBAR
-
-=====================================================
+# =====================================================
+# SIDEBAR
+# =====================================================
 
 pagina = st.sidebar.radio(
 
-"Navegação",
+    "Navegação",
 
+    [
 
+        "Dashboard",
 
-[
+        "Novo Evento",
 
+        "Eventos"
 
-
-    "Dashboard",
-
-
-
-    "Novo Evento",
-
-
-
-    "Eventos"
-
-
-
-]
+    ]
 
 )
 
-=====================================================
 
-DASHBOARD
-
-=====================================================
+# =====================================================
+# DASHBOARD
+# =====================================================
 
 if pagina == "Dashboard":
 
-dashboard()
+    dashboard()
 
-=====================================================
 
-NOVO EVENTO
-
-=====================================================
+# =====================================================
+# NOVO EVENTO
+# =====================================================
 
 elif pagina == "Novo Evento":
 
-st.title(
-
-    "➕ Novo Evento"
-
-)
-
-
-
-with st.form(
-
-    "novo_evento"
-
-):
-
-
-
-    titulo = st.text_input(
-
-        "Título"
-
+    st.title(
+        "➕ Novo Evento"
     )
 
+    with st.form(
+        "novo_evento"
+    ):
 
+        titulo = st.text_input(
+            "Título"
+        )
 
-    descricao = st.text_area(
+        descricao = st.text_area(
+            "Descrição"
+        )
 
-        "Descrição"
+        categoria = st.selectbox(
 
-    )
+            "Categoria",
 
+            [
 
+                "Estudos",
 
-    categoria = st.selectbox(
+                "Trabalho",
 
+                "Saúde",
 
+                "Família",
 
-        "Categoria",
+                "Financeiro",
 
+                "Outros"
 
-
-        [
-
-
-
-            "Estudos",
-
-
-
-            "Trabalho",
-
-
-
-            "Saúde",
-
-
-
-            "Família",
-
-
-
-            "Financeiro",
-
-
-
-            "Outros"
-
-
-
-        ]
-
-
-
-    )
-
-
-
-    prioridade = st.selectbox(
-
-
-
-        "Prioridade",
-
-
-
-        [
-
-
-
-            "Alta",
-
-
-
-            "Média",
-
-
-
-            "Baixa"
-
-
-
-        ]
-
-
-
-    )
-
-
-
-    data = st.date_input(
-
-        "Data"
-
-    )
-
-
-
-    hora = st.time_input(
-
-        "Hora"
-
-    )
-
-
-
-    recorrencia = st.selectbox(
-
-
-
-        "Recorrência",
-
-
-
-        [
-
-
-
-            "Nenhuma",
-
-
-
-            "Diária",
-
-
-
-            "Semanal",
-
-
-
-            "Mensal",
-
-
-
-            "Anual"
-
-
-
-        ]
-
-
-
-    )
-
-
-
-    salvar = (
-
-        st.form_submit_button(
-
-            "Salvar"
+            ]
 
         )
 
-    )
+        prioridade = st.selectbox(
 
+            "Prioridade",
 
+            [
 
-    if salvar:
+                "Alta",
 
+                "Média",
 
+                "Baixa"
 
-        adicionar_evento(
-
-
-
-            titulo,
-
-
-
-            descricao,
-
-
-
-            categoria,
-
-
-
-            prioridade,
-
-
-
-            data,
-
-
-
-            hora,
-
-
-
-            recorrencia
-
-
+            ]
 
         )
 
+        data = st.date_input(
+            "Data"
+        )
 
+        hora = st.time_input(
+            "Hora"
+        )
 
-        st.success(
+        recorrencia = st.selectbox(
 
-            "Evento salvo!"
+            "Recorrência",
+
+            [
+
+                "Nenhuma",
+
+                "Diária",
+
+                "Semanal",
+
+                "Mensal",
+
+                "Anual"
+
+            ]
 
         )
 
-=====================================================
+        salvar = (
+            st.form_submit_button(
+                "Salvar"
+            )
+        )
 
-EVENTOS
+        if salvar:
 
-=====================================================
+            adicionar_evento(
+
+                titulo,
+
+                descricao,
+
+                categoria,
+
+                prioridade,
+
+                data,
+
+                hora,
+
+                recorrencia
+
+            )
+
+            st.success(
+                "Evento salvo!"
+            )
+# =====================================================
+# EVENTOS
+# =====================================================
 
 elif pagina == "Eventos":
 
-st.title("📋 Eventos")
+    st.title("📋 Eventos")
 
+    if not st.session_state.eventos:
 
+        st.info("Nenhum evento cadastrado.")
 
-if not st.session_state.eventos:
+    else:
 
+        pesquisar = st.text_input(
+            "🔎 Pesquisar"
+        ).lower()
 
+        categoria_filtro = st.selectbox(
 
-    st.info("Nenhum evento cadastrado.")
+            "Categoria",
 
+            [
 
+                "Todas",
 
-else:
+                "Estudos",
 
+                "Trabalho",
 
+                "Saúde",
 
-    pesquisar = st.text_input(
+                "Família",
 
-        "🔎 Pesquisar"
+                "Financeiro",
 
-    ).lower()
+                "Outros"
 
-
-
-    categoria_filtro = st.selectbox(
-
-
-
-        "Categoria",
-
-
-
-        [
-
-
-
-            "Todas",
-
-
-
-            "Estudos",
-
-
-
-            "Trabalho",
-
-
-
-            "Saúde",
-
-
-
-            "Família",
-
-
-
-            "Financeiro",
-
-
-
-            "Outros"
-
-
-
-        ]
-
-
-
-    )
-
-
-
-    prioridade_filtro = st.selectbox(
-
-
-
-        "Prioridade",
-
-
-
-        [
-
-
-
-            "Todas",
-
-
-
-            "Alta",
-
-
-
-            "Média",
-
-
-
-            "Baixa"
-
-
-
-        ]
-
-
-
-    )
-
-
-
-    eventos = sorted(
-
-
-
-        st.session_state.eventos,
-
-
-
-        key=lambda e: datetime.strptime(
-
-
-
-            e.data,
-
-
-
-            "%d/%m/%Y"
-
-
+            ]
 
         )
 
+        prioridade_filtro = st.selectbox(
 
+            "Prioridade",
 
-    )
+            [
 
+                "Todas",
 
+                "Alta",
 
-    for evento in eventos:
+                "Média",
 
+                "Baixa"
 
+            ]
 
-        if pesquisar:
+        )
 
+        eventos = sorted(
 
+            st.session_state.eventos,
 
-            texto = (
+            key=lambda e: datetime.strptime(
 
+                e.data,
 
+                "%d/%m/%Y"
 
-                evento.titulo
+            )
 
+        )
 
+        for evento in eventos:
 
-                + evento.descricao
+            if pesquisar:
 
+                texto = (
 
+                    evento.titulo
 
-                + evento.categoria
+                    + evento.descricao
 
+                    + evento.categoria
 
+                ).lower()
 
-            ).lower()
+                if pesquisar not in texto:
 
+                    continue
 
+            if (
 
-            if pesquisar not in texto:
+                categoria_filtro != "Todas"
 
+                and evento.categoria != categoria_filtro
 
+            ):
 
                 continue
 
+            if (
 
+                prioridade_filtro != "Todas"
 
-        if (
-
-
-
-            categoria_filtro != "Todas"
-
-
-
-            and evento.categoria != categoria_filtro
-
-
-
-        ):
-
-
-
-            continue
-
-
-
-        if (
-
-
-
-            prioridade_filtro != "Todas"
-
-
-
-            and evento.prioridade != prioridade_filtro
-
-
-
-        ):
-
-
-
-            continue
-
-
-
-        dias = dias_restantes(
-
-
-
-            evento.data
-
-
-
-        )
-
-
-
-        with st.expander(
-
-
-
-            f"📅 {evento.titulo}"
-
-
-
-        ):
-
-
-
-            st.write(
-
-
-
-                f"**Descrição:** {evento.descricao}"
-
-
-
-            )
-
-
-
-            st.write(
-
-
-
-                f"**Categoria:** {evento.categoria}"
-
-
-
-            )
-
-
-
-            st.write(
-
-
-
-                f"**Prioridade:** {evento.prioridade}"
-
-
-
-            )
-
-
-
-            st.write(
-
-
-
-                f"**Data:** {evento.data}"
-
-
-
-            )
-
-
-
-            st.write(
-
-
-
-                f"**Hora:** {evento.hora}"
-
-
-
-            )
-
-
-
-            st.write(
-
-
-
-                f"**Recorrência:** {evento.recorrencia}"
-
-
-
-            )
-
-
-
-            if evento.concluido:
-
-
-
-                st.success(
-
-
-
-                    "✅ Concluído"
-
-
-
-                )
-
-
-
-            else:
-
-
-
-                st.warning(
-
-
-
-                    "⌛ Pendente"
-
-
-
-                )
-
-
-
-            if dias > 0:
-
-
-
-                st.info(
-
-
-
-                    f"Faltam {dias} dias."
-
-
-
-                )
-
-
-
-            elif dias == 0:
-
-
-
-                st.success(
-
-
-
-                    "É hoje!"
-
-
-
-                )
-
-
-
-            else:
-
-
-
-                st.error(
-
-
-
-                    f"Atrasado há {-dias} dias."
-
-
-
-                )
-
-
-
-            col1, col2 = st.columns(2)
-
-
-
-            if col1.button(
-
-
-
-                "✅ Concluir",
-
-
-
-                key=f"c{evento.id}"
-
-
+                and evento.prioridade != prioridade_filtro
 
             ):
 
+                continue
 
+            dias = dias_restantes(
 
-                evento.concluido = True
+                evento.data
 
+            )
 
+            with st.expander(
 
-                salvar_eventos(
-
-
-
-                    st.session_state.eventos
-
-
-
-                )
-
-
-
-                st.rerun()
-
-
-
-            if col2.button(
-
-
-
-                "🗑 Excluir",
-
-
-
-                key=f"d{evento.id}"
-
-
+                f"📅 {evento.titulo}"
 
             ):
 
+                st.write(
 
-
-                st.session_state.eventos.remove(
-
-
-
-                    evento
-
-
+                    f"**Descrição:** {evento.descricao}"
 
                 )
 
+                st.write(
 
-
-                salvar_eventos(
-
-
-
-                    st.session_state.eventos
-
-
+                    f"**Categoria:** {evento.categoria}"
 
                 )
 
+                st.write(
+
+                    f"**Prioridade:** {evento.prioridade}"
+
+                )
+
+                st.write(
+
+                    f"**Data:** {evento.data}"
+
+                )
+
+                st.write(
+
+                    f"**Hora:** {evento.hora}"
+
+                )
+
+                st.write(
+
+                    f"**Recorrência:** {evento.recorrencia}"
+
+                )
+
+                if evento.concluido:
+
+                    st.success(
+
+                        "✅ Concluído"
+
+                    )
+
+                else:
+
+                    st.warning(
+
+                        "⌛ Pendente"
+
+                    )
+
+                if dias > 0:
+
+                    st.info(
+
+                        f"Faltam {dias} dias."
+
+                    )
+
+                elif dias == 0:
+
+                    st.success(
+
+                        "É hoje!"
+
+                    )
+
+                else:
+
+                    st.error(
+
+                        f"Atrasado há {-dias} dias."
+
+                    )
+
+                col1, col2 = st.columns(2)
+
+                if col1.button(
+
+                    "✅ Concluir",
+
+                    key=f"c{evento.id}"
+
+                ):
+
+                    evento.concluido = True
+
+                    salvar_eventos(
+
+                        st.session_state.eventos
+
+                    )
+
+                    st.rerun()
+
+                if col2.button(
+
+                    "🗑 Excluir",
+
+                    key=f"d{evento.id}"
+
+                ):
+
+                    st.session_state.eventos.remove(
+
+                        evento
+
+                    )
+
+                    salvar_eventos(
+
+                        st.session_state.eventos
+
+                    )
+
+                    st.rerun()
 
 
-                st.rerun()
-
-=====================================================
-
-RODAPÉ
-
-=====================================================
+# =====================================================
+# RODAPÉ
+# =====================================================
 
 st.divider()
 
 st.caption(
 
-"SmartAgenda • versão 2.0"
+    "SmartAgenda • versão 2.0"
 
 )
